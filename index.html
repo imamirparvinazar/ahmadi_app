@@ -1,106 +1,40 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>مدیریت هوشمند ابری v5</title>
+    <title>مدیریت هوشمند فروشگاه v4</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100;400;700;900&display=swap');
+        * { font-family: 'Vazirmatn', sans-serif !important; }
+        body { background-color: #f8fafc; color: #1e293b; }
 
-        * {
-            font-family: 'Vazirmatn', sans-serif !important;
-        }
-
-        body {
-            background-color: #f8fafc;
-            color: #1e293b;
-            overflow-x: hidden;
-        }
-
-        /* استایل‌های مودال و فرم */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(15, 23, 42, 0.8);
-            backdrop-filter: blur(4px);
-            z-index: 50;
-            align-items: center;
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; left: 0; 
+            width: 100%; height: 100%; 
+            background: rgba(15, 23, 42, 0.6); 
+            backdrop-filter: blur(4px); 
+            z-index: 50; 
+            align-items: center; 
             justify-content: center;
             padding: 1rem;
         }
 
-        .input-field {
-            width: 100%;
-            padding: 0.75rem;
-            border-radius: 0.5rem;
-            border: 1px solid #cbd5e1;
-            background-color: #ffffff;
-            transition: all 0.2s;
-            direction: ltr;
-            text-align: right;
-        }
-
-        .input-field:focus {
-            outline: none;
-            border-color: #3b82f6;
-            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
-        }
-
-        .card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 1rem;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-        }
-
-        /* تقویم */
-        .dp-calendar {
-            display: none;
-            position: absolute;
-            background: white;
-            border: 1px solid #e2e8f0;
-            border-radius: 12px;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            z-index: 100;
-            padding: 10px;
-            width: 280px;
-        }
-
-        .dp-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            text-align: center;
-            gap: 2px;
-        }
-
-        .dp-day {
-            padding: 8px;
-            cursor: pointer;
-            border-radius: 6px;
-            font-size: 13px;
-        }
-
-        .dp-day:hover {
-            background: #eff6ff;
-        }
-
-        .amount-word {
-            font-size: 11px;
-            color: #64748b;
-            margin-top: 4px;
-            display: block;
-            font-weight: 500;
-        }
-
-        /* پنل کناری پرداخت */
+        .input-field { width: 100%; padding: 0.75rem; border-radius: 0.5rem; border: 1px solid #cbd5e1; background-color: #ffffff; transition: all 0.2s; direction: ltr; text-align: right; }
+        .input-field:focus { outline: none; border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15); }
+        .card { background: white; padding: 1.5rem; border-radius: 1rem; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+        
+        .dp-calendar { display: none; position: absolute; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); z-index: 100; padding: 10px; width: 280px; }
+        .dp-grid { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; gap: 2px; }
+        .dp-day { padding: 8px; cursor: pointer; border-radius: 6px; font-size: 13px; }
+        .dp-day:hover { background: #eff6ff; }
+        .dp-day.selected { background: #3b82f6; color: white; }
+        
+        .amount-word { font-size: 11px; color: #64748b; margin-top: 4px; display: block; font-weight: 500; }
+        
         #payment-side-panel {
             display: none;
             width: 350px;
@@ -110,6 +44,7 @@
             border-top-right-radius: 1.5rem;
             border-bottom-right-radius: 1.5rem;
             padding: 2rem;
+            animation: slideIn 0.2s ease-out;
         }
 
         .main-form-panel {
@@ -120,125 +55,47 @@
             transition: all 0.3s ease;
         }
 
-        .rounded-dynamic {
-            border-radius: 1.5rem;
-        }
+        .rounded-dynamic { border-radius: 1.5rem; }
+        .rounded-dynamic-open { border-top-right-radius: 0; border-bottom-right-radius: 0; border-top-left-radius: 1.5rem; border-bottom-left-radius: 1.5rem; }
 
-        .rounded-dynamic-open {
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-            border-top-left-radius: 1.5rem;
-            border-bottom-left-radius: 1.5rem;
-        }
-
-        /* لایه امنیتی قفل */
-        #security-lock {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #0f172a;
-            z-index: 9999;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            text-align: center;
-        }
-
-        #loading-overlay {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.8);
-            z-index: 200;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-
+        @keyframes slideIn { from { transform: translateX(-10px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        
         @media (max-width: 768px) {
-            #main-modal-container {
-                flex-direction: column;
-            }
+            #main-modal-container { flex-direction: column; }
+            #payment-side-panel { width: 100%; border-radius: 1.5rem 1.5rem 0 0; border: 1px solid #e2e8f0; border-left: 1px solid #e2e8f0; }
+            .rounded-dynamic-open { border-radius: 0 0 1.5rem 1.5rem; }
+        }
 
-            #payment-side-panel {
-                width: 100%;
-                border-radius: 1.5rem 1.5rem 0 0;
-                border: 1px solid #e2e8f0;
-                border-left: 1px solid #e2e8f0;
-            }
-
-            .rounded-dynamic-open {
-                border-radius: 0 0 1.5rem 1.5rem;
-            }
+        /* Lock Screen Style */
+        #lock-screen {
+            position: fixed; top:0; left:0; width:100%; height:100%;
+            background: #1e293b; z-index: 1000; display: flex;
+            align-items: center; justify-content: center;
         }
     </style>
 </head>
-
 <body class="p-4 md:p-8 text-right">
 
-    <div id="security-lock">
-        <div class="mb-6 text-6xl text-rose-500"><i class="fas fa-lock"></i></div>
-        <h1 class="text-3xl font-black mb-4">سیستم قفل است</h1>
-        <p class="mb-8 text-slate-400">لطفاً فلش حاوی فایل لایسنس (key.txt) را متصل کرده و فایل را انتخاب کنید.</p>
-
-        <label
-            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-xl cursor-pointer transition flex items-center gap-2">
-            <i class="fas fa-usb"></i>
-            انتخاب فایل کلید از فلش
-            <input type="file" id="key-file-input" hidden accept=".txt" onchange="checkLicenseKey(event)">
-        </label>
-        <p id="lock-msg" class="mt-4 text-rose-400 text-sm font-bold"></p>
-
-        <div id="github-setup" class="mt-12 p-6 border border-slate-700 rounded-xl bg-slate-800 hidden w-96">
-            <h3 class="text-lg font-bold mb-4 text-white">تنظیمات اتصال به دیتابیس GitHub</h3>
-            <input type="text" id="gh-token" placeholder="GitHub Token (ghp_...)"
-                class="input-field mb-2 !bg-slate-700 !text-white !border-slate-600 text-center">
-            <input type="text" id="gh-gist-id" placeholder="Gist ID"
-                class="input-field mb-4 !bg-slate-700 !text-white !border-slate-600 text-center">
-            <button onclick="saveGithubConfig()" class="w-full bg-emerald-600 py-2 rounded font-bold">ذخیره
-                تنظیمات</button>
-            <p class="text-xs text-slate-500 mt-2">این اطلاعات در حافظه مرورگر ذخیره می‌شود تا در مراجعات بعدی نیاز به
-                ورود نباشد.</p>
+    <div id="lock-screen">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-80 text-center">
+            <h2 class="text-xl font-bold mb-4">ورود به سیستم</h2>
+            <input type="password" id="app-pass-input" placeholder="رمز عبور را وارد کنید" class="input-field mb-4 !text-center" style="direction: ltr;">
+            <button onclick="checkPassword()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold">ورود</button>
         </div>
     </div>
 
-    <div id="loading-overlay">
-        <div class="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-blue-600 mb-4"></div>
-        <h2 class="text-xl font-bold text-slate-700">در حال همگام‌سازی با سرور GitHub...</h2>
-        <p class="text-sm text-slate-500">لطفا صبر کنید</p>
-    </div>
-
-    <div class="max-w-7xl mx-auto hidden" id="app-container">
+    <div class="max-w-6xl mx-auto" id="main-content" style="display:none;">
         <header class="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
             <div>
-                <h1 class="text-2xl font-black text-slate-900">پنل مدیریت هوشمند (نسخه ابری GitHub)</h1>
-                <p class="text-slate-500 text-sm">وضعیت اتصال: <span class="text-emerald-600 font-bold">آنلاین ●</span>
-                </p>
+                <h1 class="text-2xl font-black text-slate-900">پنل مدیریت هوشمند فروشگاه</h1>
+                <p class="text-slate-500 text-sm">حسابداری دقیق با تفکیک طلب و بدهی</p>
             </div>
             <div class="flex flex-wrap gap-2">
-                <button onclick="syncData(true)"
-                    class="bg-slate-700 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-slate-800">
-                    <i class="fas fa-sync-alt ml-1"></i> بروزرسانی دستی
-                </button>
-                <button onclick="exportToExcel()"
-                    class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-sm hover:bg-emerald-700">خروجی
-                    اکسل</button>
-                <button onclick="openTransactionModal()"
-                    class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg hover:bg-blue-700">
-                    <i class="fas fa-plus ml-1"></i> ثبت تراکنش جدید
-                </button>
-                <button onclick="lockApp()"
-                    class="bg-rose-600 text-white px-4 py-2 rounded-lg font-bold hover:bg-rose-700"
-                    title="قفل کردن برنامه">
-                    <i class="fas fa-lock"></i>
-                </button>
+                <button onclick="logout()" class="bg-slate-200 text-slate-700 px-4 py-2 rounded-lg font-bold text-sm transition hover:bg-rose-500 hover:text-white">قفل کردن</button>
+                <button onclick="exportToExcel()" class="bg-emerald-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition hover:bg-emerald-700">خروجی اکسل (CSV)</button>
+                <button onclick="document.getElementById('import-excel').click()" class="bg-amber-600 text-white px-4 py-2 rounded-lg font-bold text-sm transition hover:bg-amber-700">ورود داده (CSV)</button>
+                <input type="file" id="import-excel" hidden accept=".csv" onchange="importFromExcel(event)">
+                <button onclick="openTransactionModal()" class="bg-blue-600 text-white px-6 py-2 rounded-lg font-bold shadow-lg transition hover:bg-blue-700">ثبت تراکنش جدید</button>
             </div>
         </header>
 
@@ -260,15 +117,33 @@
         <div class="card !p-0 overflow-hidden shadow-xl border-none">
             <div class="p-4 bg-slate-50 border-b flex flex-wrap gap-4 items-center">
                 <div class="flex-1 min-w-[200px]">
-                    <input type="text" id="search-input" oninput="renderTable()" placeholder="جستجو..."
-                        class="input-field !text-right !bg-white">
+                    <input type="text" id="search-input" oninput="renderTable()" 
+                           placeholder="جستجو در نام، موبایل یا توضیحات..." 
+                           class="input-field !text-right !bg-white">
                 </div>
-                <div class="w-40"><select id="filter-type" onchange="renderTable()"
-                        class="input-field !text-right !bg-white">
+                <div class="flex items-center gap-2">
+                    <span class="text-xs font-bold text-slate-500">از:</span>
+                    <input type="text" id="date-from" readonly onclick="showDP(this)" 
+                           placeholder="----/--/--" class="input-field !w-32 !text-center !bg-white cursor-pointer">
+                    <span class="text-xs font-bold text-slate-500">تا:</span>
+                    <input type="text" id="date-to" readonly onclick="showDP(this)" 
+                           placeholder="----/--/--" class="input-field !w-32 !text-center !bg-white cursor-pointer">
+                    <button onclick="clearDateFilter()" class="text-rose-500 text-xs font-bold">حذف تاریخ</button>
+                </div>
+                <div class="w-40">
+                    <select id="filter-type" onchange="renderTable()" class="input-field !text-right !bg-white">
                         <option value="all">همه اشخاص</option>
                         <option value="customer">مشتریان</option>
                         <option value="supplier">تأمین‌کنندگان</option>
-                    </select></div>
+                    </select>
+                </div>
+                <div class="w-40">
+                    <select id="filter-status" onchange="renderTable()" class="input-field !text-right !bg-white">
+                        <option value="all">همه وضعیت‌ها</option>
+                        <option value="debt">فقط بدهکاران</option>
+                        <option value="settled">تسویه شده</option>
+                    </select>
+                </div>
             </div>
 
             <div class="overflow-x-auto">
@@ -302,8 +177,8 @@
                 <div id="side-check" class="space-y-4 hidden">
                     <input type="text" id="check-num" placeholder="شماره چک" class="input-field !text-center">
                     <input type="text" id="check-bank" placeholder="بانک صادرکننده" class="input-field">
-                    <input type="text" id="check-date" readonly onclick="showDP(this)" placeholder="تاریخ سررسید"
-                        class="input-field bg-white cursor-pointer !text-center">
+                    <input type="text" id="check-date" readonly onclick="showDP(this)" placeholder="تاریخ سررسید" class="input-field bg-white cursor-pointer !text-center">
+                    <input type="text" id="check-owner" placeholder="نام صاحب چک" class="input-field">
                 </div>
                 <div id="side-pos" class="space-y-4 hidden">
                     <input type="text" id="pos-terminal" placeholder="شماره ترمینال" class="input-field !text-center">
@@ -315,59 +190,55 @@
                 <h3 id="modal-title" class="text-2xl font-black mb-8 text-slate-800">ثبت تراکنش</h3>
                 <form id="transaction-form" onsubmit="saveTransaction(event)" class="space-y-4">
                     <input type="hidden" id="edit-id">
+                    <div id="quick-pay-section" class="hidden bg-emerald-50 p-4 rounded-xl border border-emerald-100 mb-4">
+                        <p class="text-xs font-bold text-emerald-700 mb-2">ثبت مبلغ دریافتی جدید:</p>
+                        <input type="text" id="new-pay-display" class="input-field font-bold !text-left" placeholder="مبلغ دریافتی جدید" oninput="handleInput(this, 'new-pay-val', 'new-pay-w')">
+                        <input type="hidden" id="new-pay-val" value="0">
+                        <span id="new-pay-w" class="amount-word"></span>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" id="party-name" placeholder="نام طرف حساب" required
-                            class="input-field !text-right">
-                        <input type="text" id="party-mobile" placeholder="شماره موبایل" required
-                            class="input-field !text-center">
+                        <input type="text" id="party-name" placeholder="نام طرف حساب" required class="input-field !text-right">
+                        <input type="text" id="party-mobile" placeholder="شماره موبایل" required class="input-field !text-center">
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <select id="party-type" class="input-field !text-right">
                             <option value="customer">مشتری (طلب ما)</option>
                             <option value="supplier">تامین‌کننده (بدهی ما)</option>
                         </select>
-                        <input type="text" id="transaction-date" readonly onclick="showDP(this)" required
-                            class="input-field bg-slate-50 cursor-pointer !text-center">
+                        <input type="text" id="transaction-date" readonly onclick="showDP(this)" required class="input-field bg-slate-50 cursor-pointer !text-center">
                     </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="main-amount-row">
                         <div>
-                            <input type="text" id="total-display" class="input-field font-bold !text-left"
-                                placeholder="مبلغ کل فاکتور" oninput="handleInput(this, 'total-val', 'total-w')">
+                            <input type="text" id="total-display" class="input-field font-bold !text-left" placeholder="مبلغ کل" oninput="handleInput(this, 'total-val', 'total-w')">
                             <input type="hidden" id="total-val">
                             <span id="total-w" class="amount-word"></span>
                         </div>
                         <div>
-                            <input type="text" id="paid-display"
-                                class="input-field font-bold text-emerald-600 !text-left" placeholder="مبلغ پرداختی"
-                                oninput="handleInput(this, 'paid-val', 'paid-w')">
+                            <input type="text" id="paid-display" class="input-field font-bold text-emerald-600 !text-left" placeholder="مبلغ پرداختی" oninput="handleInput(this, 'paid-val', 'paid-w')">
                             <input type="hidden" id="paid-val">
                             <span id="paid-w" class="amount-word"></span>
                         </div>
                     </div>
                     <div>
-                        <textarea id="description" placeholder="توضیحات (اختیاری)..."
-                            class="input-field !text-right h-20 resize-none"></textarea>
+                        <textarea id="description" placeholder="توضیحات (اختیاری)..." class="input-field !text-right h-20 resize-none"></textarea>
                     </div>
                     <div>
                         <select id="pay-method" class="input-field !text-right" onchange="syncSidePanel()">
-                            <option value="none">بدون جزئیات بانکی</option>
+                            <option value="none">ثبت در دفتر (بدون جزئیات بانکی)</option>
                             <option value="card">کارت به کارت</option>
                             <option value="check">چک</option>
                             <option value="pos">کارتخوان</option>
                         </select>
                     </div>
-                    <div
-                        class="bg-blue-50 p-4 rounded-2xl flex justify-between items-center border border-blue-100 mt-4">
+                    <div class="bg-blue-50 p-4 rounded-2xl flex justify-between items-center border border-blue-100 mt-4">
                         <div>
-                            <span class="text-xs text-blue-500 font-bold block">مانده نهایی این تراکنش:</span>
+                            <span class="text-xs text-blue-500 font-bold block">مانده نهایی:</span>
                             <span id="calc-res" class="font-black text-xl text-blue-700">۰ ریال</span>
                         </div>
-                        <button type="submit"
-                            class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition shadow-lg shadow-blue-200">تایید
-                            و ذخیره</button>
+                        <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-xl font-bold hover:bg-blue-700 transition">تایید و ثبت</button>
                     </div>
-                    <button type="button" onclick="closeModal('transaction-modal')"
-                        class="w-full text-slate-400 text-sm hover:text-slate-600">انصراف</button>
+                    <button type="button" onclick="closeModal('transaction-modal')" class="w-full text-slate-400 text-sm">انصراف و بستن</button>
                 </form>
             </div>
         </div>
@@ -385,162 +256,102 @@
     <script src="https://cdn.jsdelivr.net/npm/jalali-moment/dist/jalali-moment.browser.js"></script>
 
     <script>
-        // --- تنظیمات امنیتی و دیتابیس ---
-        let transactions = [];
-        let GITHUB_TOKEN = localStorage.getItem('gh_token') || "";
-        let GIST_ID = localStorage.getItem('gh_gist_id') || "";
-        const LICENSE_KEY = "SECRET_AHMADI_STORE_1403"; // رمز فایل فلش
+        // --- تنظیمات امنیتی ---
+        const APP_PASSWORD = "AmirAhmadi1404@!"; // رمز عبور خود را اینجا تغییر دهید
 
-        // 1. بررسی قفل سخت افزاری (شبیه سازی با فایل)
-        function checkLicenseKey(event) {
-            const file = event.target.files[0];
-            if (!file) return;
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                if (e.target.result.trim() === LICENSE_KEY) {
-                    // رمز درست است
-                    if (!GITHUB_TOKEN || !GIST_ID) {
-                        document.getElementById('github-setup').classList.remove('hidden');
-                        document.getElementById('lock-msg').innerText = "هویت تایید شد. لطفا تنظیمات GitHub را وارد کنید.";
-                    } else {
-                        unlockApp();
-                    }
-                } else {
-                    document.getElementById('lock-msg').innerText = "فایل لایسنس نامعتبر است. دسترسی غیرمجاز.";
-                    event.target.value = ''; // ریست کردن اینپوت
+        function checkPassword() {
+            const input = document.getElementById('app-pass-input').value;
+            if (input === APP_PASSWORD) {
+                sessionStorage.setItem('isLoggedIn', 'true');
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            } else {
+                alert('رمز عبور اشتباه است!');
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('isLoggedIn');
+            location.reload();
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            if (sessionStorage.getItem('isLoggedIn') === 'true') {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+            }
+        });
+
+        // --- منطق برنامه ---
+        let db;
+        let transactions = [];
+        let activeInput = null;
+        let viewDate = moment();
+
+        function initDB() {
+            const req = indexedDB.open("StoreMasterDB_v5", 1);
+            req.onupgradeneeded = (e) => {
+                db = e.target.result;
+                if (!db.objectStoreNames.contains("tx")) {
+                    db.createObjectStore("tx", { keyPath: "id", autoIncrement: true });
                 }
             };
-            reader.readAsText(file);
+            req.onsuccess = (e) => { db = e.target.result; loadData(); };
         }
 
-        function saveGithubConfig() {
-            const t = document.getElementById('gh-token').value.trim();
-            const g = document.getElementById('gh-gist-id').value.trim();
-            if (t && g) {
-                localStorage.setItem('gh_token', t);
-                localStorage.setItem('gh_gist_id', g);
-                GITHUB_TOKEN = t; GIST_ID = g;
-                unlockApp();
-            } else {
-                alert("لطفا هر دو فیلد را پر کنید");
-            }
+        function loadData() {
+            db.transaction("tx").objectStore("tx").getAll().onsuccess = (e) => {
+                transactions = e.target.result;
+                renderTable();
+            };
         }
-
-        function unlockApp() {
-            document.getElementById('security-lock').style.display = 'none';
-            document.getElementById('app-container').classList.remove('hidden');
-            syncData(false); // دریافت اطلاعات از گیت هاب
-        }
-
-        function lockApp() {
-            location.reload(); // ساده ترین راه برای قفل مجدد
-        }
-
-        // 2. توابع ارتباط با GitHub Gist API
-        async function syncData(force = false) {
-            showLoading(true);
-            try {
-                // GET
-                const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    headers: { 'Authorization': `token ${GITHUB_TOKEN}` }
-                });
-
-                if (!res.ok) throw new Error("خطا در ارتباط با گیت‌هاب");
-                const data = await res.json();
-
-                // خواندن فایل db.json از داخل Gist
-                if (data.files && data.files['db.json']) {
-                    const content = data.files['db.json'].content;
-                    transactions = JSON.parse(content);
-                    renderTable();
-                    if (force) alert("اطلاعات بروزرسانی شد");
-                } else {
-                    // اگر فایل نبود، می‌سازیم
-                    transactions = [];
-                    await saveToCloud();
-                }
-            } catch (err) {
-                alert("خطا: " + err.message + "\nآیا توکن و ID درست است؟");
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        async function saveToCloud() {
-            showLoading(true);
-            try {
-                const body = {
-                    files: {
-                        "db.json": { content: JSON.stringify(transactions) }
-                    }
-                };
-
-                const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-                    method: 'PATCH',
-                    headers: {
-                        'Authorization': `token ${GITHUB_TOKEN}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(body)
-                });
-                if (!res.ok) throw new Error("ذخیره نشد!");
-            } catch (err) {
-                alert("خطا در ذخیره سازی ابری: " + err.message);
-            } finally {
-                showLoading(false);
-            }
-        }
-
-        function showLoading(show) {
-            document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
-        }
-
-        // --- توابع برنامه ---
 
         function renderTable() {
             const body = document.getElementById('ledger-body');
-            const searchTerm = document.getElementById('search-input').value.toLowerCase();
-            const typeFilter = document.getElementById('filter-type').value;
+            const searchTerm = document.getElementById('search-input')?.value.toLowerCase() || '';
+            const typeFilter = document.getElementById('filter-type')?.value || 'all';
+            const statusFilter = document.getElementById('filter-status')?.value || 'all';
+            const dateFrom = document.getElementById('date-from')?.value || '';
+            const dateTo = document.getElementById('date-to')?.value || '';
 
             body.innerHTML = '';
             let tC = 0, tS = 0;
 
             const filtered = transactions.filter(t => {
-                const matchesSearch = t.partyName.toLowerCase().includes(searchTerm) || t.partyMobile.includes(searchTerm);
+                const matchesSearch = t.partyName.toLowerCase().includes(searchTerm) || 
+                                     t.partyMobile.includes(searchTerm) || 
+                                     (t.desc && t.desc.toLowerCase().includes(searchTerm));
                 const matchesType = typeFilter === 'all' || t.partyType === typeFilter;
-                return matchesSearch && matchesType;
+                const bal = t.total - t.paid;
+                const matchesStatus = statusFilter === 'all' || (statusFilter === 'debt' && bal > 0) || (statusFilter === 'settled' && bal <= 0);
+                const matchesDate = (!dateFrom || t.date >= dateFrom) && (!dateTo || t.date <= dateTo);
+                return matchesSearch && matchesType && matchesStatus && matchesDate;
             });
 
-            // مرتب سازی: جدیدترین بالا
-            filtered.sort((a, b) => b.ts - a.ts).forEach(t => {
-                const bal = (parseInt(t.total) || 0) - (parseInt(t.paid) || 0);
+            filtered.sort((a, b) => {
+                const dateCompare = b.date.localeCompare(a.date);
+                return dateCompare !== 0 ? dateCompare : b.ts - a.ts;
+            }).forEach(t => {
+                const bal = t.total - t.paid;
                 if (t.partyType === 'customer') tC += bal; else tS += bal;
-
-                const isSettled = bal === 0;
-
+                
                 body.innerHTML += `
-                    <tr class="hover:bg-slate-50 transition-colors border-b">
+                    <tr class="hover:bg-slate-50 transition-colors">
                         <td class="p-4 text-xs font-bold text-slate-500">${t.date}</td>
                         <td class="p-4">
                             <b class="text-slate-900">${t.partyName}</b><br>
                             <small class="text-slate-400">${t.partyMobile}</small>
-                            ${t.desc ? `<div class="text-xs text-blue-500 mt-1 bg-blue-50 inline-block px-2 rounded">${t.desc}</div>` : ''}
+                            ${t.desc ? `<br><small class="text-blue-500 italic">📝 ${t.desc}</small>` : ''}
                         </td>
                         <td class="p-4 font-medium">${new Intl.NumberFormat().format(t.total)}</td>
                         <td class="p-4 text-emerald-600 font-bold">${new Intl.NumberFormat().format(t.paid)}</td>
-                        <td class="p-4 font-black ${bal > 0 ? 'text-rose-600' : 'text-slate-300'}">
-                            ${bal !== 0 ? new Intl.NumberFormat().format(bal) : '<i class="fas fa-check text-emerald-500"></i> تسویه'}
-                        </td>
+                        <td class="p-4 font-black ${bal > 0 ? 'text-rose-600' : 'text-slate-300'}">${bal > 0 ? new Intl.NumberFormat().format(bal) : 'تسویه'}</td>
                         <td class="p-4 text-center">
-                            <div class="flex flex-col gap-2">
-                                <div class="flex gap-1 justify-center">
-                                    <button onclick="editTx(${t.id})" class="bg-slate-100 text-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-200" title="ویرایش"><i class="fas fa-edit"></i></button>
-                                    <button onclick="deleteTx(${t.id})" class="bg-rose-50 text-rose-500 px-2 py-1 rounded text-xs hover:bg-rose-100" title="حذف"><i class="fas fa-trash"></i></button>
-                                </div>
-                                <div class="flex gap-1 justify-center">
-                                    <button onclick="newFactorForCustomer(${t.id})" class="bg-blue-50 text-blue-600 px-2 py-1 rounded text-xs font-bold hover:bg-blue-100 flex-1">فاکتور جدید</button>
-                                    ${bal > 0 ? `<button onclick="addPayment(${t.id})" class="bg-emerald-50 text-emerald-600 px-2 py-1 rounded text-xs font-bold hover:bg-emerald-100 flex-1">ثبت پرداخت</button>` : ''}
-                                </div>
+                            <div class="flex flex-wrap gap-1 justify-center">
+                                <button onclick="openQuickPay(${t.id})" class="bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-bold hover:bg-emerald-700 transition">ثبت دریافتی</button>
+                                <button onclick="editTx(${t.id})" class="bg-blue-50 text-blue-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-blue-600 hover:text-white transition">ویرایش</button>
+                                <button onclick="newCostumerFactor(${t.id})" class="bg-slate-50 text-slate-700 px-3 py-1 rounded-lg text-xs font-bold hover:bg-slate-200 transition">فاکتور جدید</button>
+                                <button onclick="deleteTx(${t.id})" class="text-rose-400 hover:text-rose-600 px-2 transition text-lg">×</button>
                             </div>
                         </td>
                     </tr>`;
@@ -551,144 +362,73 @@
             document.getElementById('tx-count').innerText = filtered.length;
         }
 
-        // --- ویژگی های جدید درخواستی ---
-
-        // 1. فاکتور جدید (اطلاعات مشتری کپی شود، مبالغ خالی)
-        function newFactorForCustomer(id) {
-            const t = transactions.find(x => x.id === id);
-            if (!t) return;
-
-            openTransactionModal(); // فرم خالی باز شود
-            // پر کردن اطلاعات مشتری
-            document.getElementById('party-name').value = t.partyName;
-            document.getElementById('party-mobile').value = t.partyMobile;
-            document.getElementById('party-type').value = t.partyType;
-            // تاریخ امروز باشد (فرمول پیش فرض)
-            // مبالغ خالی می مانند (چون تابع openTransactionModal آنها را صفر کرده)
-            document.getElementById('modal-title').innerText = "فاکتور جدید برای " + t.partyName;
+        function exportToExcel() {
+            if (transactions.length === 0) return alert("داده‌ای نیست.");
+            let csv = "\uFEFFتاریخ,نام طرف حساب,موبایل,توضیحات,نوع,مبلغ کل,پرداختی,روش,بانک مبدا,کارت مبدا,بانک مقصد,کارت مقصد,شماره چک,بانک چک,تاریخ چک,صاحب چک,ترمینال پوز,پیگیری پوز\n";
+            transactions.forEach(t => {
+                let b = t.bankInfo || {};
+                csv += [t.date, t.partyName, t.partyMobile, t.desc || '', t.partyType, t.total, t.paid, t.method,
+                        b.cardSrcB, b.cardSrcN, b.cardDstB, b.cardDstN, b.checkN, b.checkB, b.checkD, b.checkO, b.posT, b.posR]
+                        .map(v => `"${v || ''}"`).join(",") + "\n";
+            });
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = `Report_${moment().format('jYYYY-jMM-jDD')}.csv`;
+            link.click();
         }
 
-        // 2. ثبت پرداخت (بدهی را صاف کند)
-        function addPayment(id) {
-            const t = transactions.find(x => x.id === id);
-            if (!t) return;
-
-            openTransactionModal();
-            document.getElementById('party-name').value = t.partyName;
-            document.getElementById('party-mobile').value = t.partyMobile;
-            document.getElementById('party-type').value = t.partyType;
-            document.getElementById('modal-title').innerText = "ثبت پرداخت بدهی";
-
-            // در اینجا، مبلغ کل را 0 میزنیم، و کاربر مبلغ پرداختی را وارد میکند.
-            // چون سیستم حسابداری تفاضلی است: (Total - Paid).
-            // اگر Total=0 و Paid=1000 باشد، مانده میشود -1000.
-            // اگر قبلا مانده +1000 بوده، جمعش میشود 0.
-            // اما برای سادگی کاربر، بهتر است این را به عنوان یک "تراکنش جدید" ثبت کنیم که فقط پرداختی دارد.
-
-            document.getElementById('total-val').value = 0;
-            document.getElementById('total-display').value = "0";
-            document.getElementById('description').value = "بابت تسویه حساب فاکتور قبلی";
-
-            // فوکوس روی فیلد پرداختی
-            setTimeout(() => document.getElementById('paid-display').focus(), 300);
+        function importFromExcel(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split("\n");
+                const store = db.transaction("tx", "readwrite").objectStore("tx");
+                for (let i = 1; i < lines.length; i++) {
+                    const cols = lines[i].split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/).map(v => v.replace(/"/g, '').trim());
+                    if (cols.length < 7) continue;
+                    store.add({
+                        date: cols[0], partyName: cols[1], partyMobile: cols[2], desc: cols[3], partyType: cols[4],
+                        total: parseInt(cols[5]) || 0, paid: parseInt(cols[6]) || 0, method: cols[7],
+                        bankInfo: { cardSrcB: cols[8], cardSrcN: cols[9], cardDstB: cols[10], cardDstN: cols[11],
+                                    checkN: cols[12], checkB: cols[13], checkD: cols[14], checkO: cols[15],
+                                    posT: cols[16], posR: cols[17] },
+                        ts: Date.now() + i
+                    });
+                }
+                setTimeout(() => { loadData(); alert("وارد شد."); }, 500);
+            };
+            reader.readAsText(file);
         }
 
-        async function saveTransaction(e) {
+        function saveTransaction(e) {
             e.preventDefault();
             const id = document.getElementById('edit-id').value;
-            const rawDate = document.getElementById('transaction-date').value;
-
-            if (!rawDate) return alert("تاریخ الزامی است");
-
-            // دریافت روش پرداخت
-            const method = document.getElementById('pay-method').value;
+            const newPay = parseInt(document.getElementById('new-pay-val').value) || 0;
+            const currentPaid = parseInt(document.getElementById('paid-val').value) || 0;
 
             const data = {
-                id: id ? parseInt(id) : Date.now(),
-                ts: Date.now(),
                 partyName: document.getElementById('party-name').value,
                 partyMobile: document.getElementById('party-mobile').value,
                 partyType: document.getElementById('party-type').value,
-                date: rawDate,
+                date: document.getElementById('transaction-date').value,
                 desc: document.getElementById('description').value,
                 total: parseInt(document.getElementById('total-val').value) || 0,
-                paid: parseInt(document.getElementById('paid-val').value) || 0,
-                method: method,
-
-                // ذخیره فیلدهای جزئیات پرداخت (فقط اگر متد انتخاب شده باشد پر می‌شوند)
-                cardSrcBank: method === 'card' ? document.getElementById('card-src-bank').value : '',
-                cardSrcNum: method === 'card' ? document.getElementById('card-src-num').value : '',
-                cardDestBank: method === 'card' ? document.getElementById('card-dest-bank').value : '',
-                cardDestNum: method === 'card' ? document.getElementById('card-dest-num').value : '',
-
-                checkNum: method === 'check' ? document.getElementById('check-num').value : '',
-                checkBank: method === 'check' ? document.getElementById('check-bank').value : '',
-                checkDate: method === 'check' ? document.getElementById('check-date').value : '',
-                checkOwner: '', // این فیلد در فرم فعلی نیست، خالی رد می‌کنیم یا می‌توانید اضافه کنید
-
-                posTerminal: method === 'pos' ? document.getElementById('pos-terminal').value : '',
-                posRRN: method === 'pos' ? document.getElementById('pos-rrn').value : ''
+                paid: currentPaid + newPay,
+                method: document.getElementById('pay-method').value,
+                bankInfo: {
+                    cardSrcB: document.getElementById('card-src-bank').value, cardSrcN: document.getElementById('card-src-num').value,
+                    cardDstB: document.getElementById('card-dest-bank').value, cardDstN: document.getElementById('card-dest-num').value,
+                    checkN: document.getElementById('check-num').value, checkB: document.getElementById('check-bank').value,
+                    checkD: document.getElementById('check-date').value, checkO: document.getElementById('check-owner').value,
+                    posT: document.getElementById('pos-terminal').value, posR: document.getElementById('pos-rrn').value
+                },
+                ts: Date.now()
             };
-
-            if (id) {
-                const index = transactions.findIndex(x => x.id == id);
-                if (index !== -1) transactions[index] = data;
-            } else {
-                transactions.push(data);
-            }
-
-            closeModal('transaction-modal');
-            renderTable();
-            await saveToCloud();
-        }
-
-        function deleteTx(id) {
-            if (confirm("آیا مطمئن هستید؟ قابل بازگشت نیست.")) {
-                transactions = transactions.filter(t => t.id !== id);
-                renderTable();
-                saveToCloud();
-            }
-        }
-
-        function editTx(id) {
-            const t = transactions.find(x => x.id === id);
-            if (!t) return;
-            document.getElementById('edit-id').value = t.id;
-            document.getElementById('party-name').value = t.partyName;
-            document.getElementById('party-mobile').value = t.partyMobile;
-            document.getElementById('party-type').value = t.partyType;
-            document.getElementById('transaction-date').value = t.date;
-            document.getElementById('description').value = t.desc || '';
-
-            // هندل کردن ورودی های عددی
-            const totalEl = document.getElementById('total-display');
-            totalEl.value = new Intl.NumberFormat().format(t.total);
-            document.getElementById('total-val').value = t.total;
-
-            const paidEl = document.getElementById('paid-display');
-            paidEl.value = new Intl.NumberFormat().format(t.paid);
-            document.getElementById('paid-val').value = t.paid;
-
-            document.getElementById('modal-title').innerText = "ویرایش تراکنش";
-            syncSidePanel();
-            openModal('transaction-modal');
-            updateFinalBalance();
-        }
-
-        // --- توابع کمکی (بدون تغییر عمده) ---
-        let viewDate = moment();
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        function openTransactionModal() {
-            document.getElementById('transaction-form').reset();
-            document.getElementById('edit-id').value = '';
-            document.getElementById('total-val').value = 0;
-            document.getElementById('paid-val').value = 0;
-            document.getElementById('transaction-date').value = moment().locale('fa').format('YYYY/MM/DD');
-            document.getElementById('modal-title').innerText = "ثبت تراکنش جدید";
-            syncSidePanel();
-            openModal('transaction-modal');
+            const store = db.transaction("tx", "readwrite").objectStore("tx");
+            const req = id ? store.put({...data, id: parseInt(id)}) : store.add(data);
+            req.onsuccess = () => { loadData(); closeModal('transaction-modal'); };
         }
 
         function handleInput(inp, hid, wrd) {
@@ -696,29 +436,110 @@
             let n = parseInt(v) || 0;
             inp.value = n ? new Intl.NumberFormat().format(n) : "";
             document.getElementById(hid).value = n;
-            document.getElementById(wrd).innerText = n ? new Intl.NumberFormat().format(Math.floor(n / 10)) + " تومان" : "";
+            document.getElementById(wrd).innerText = n ? new Intl.NumberFormat().format(Math.floor(n/10)) + " تومان" : "";
             updateFinalBalance();
         }
 
         function updateFinalBalance() {
-            const t = parseInt(document.getElementById('total-val').value) || 0;
-            const p = parseInt(document.getElementById('paid-val').value) || 0;
-            const res = t - p;
-            document.getElementById('calc-res').innerText = new Intl.NumberFormat().format(res) + " ریال";
-            document.getElementById('calc-res').className = res > 0 ? "font-black text-xl text-rose-600" : "font-black text-xl text-emerald-600";
+            const total = parseInt(document.getElementById('total-val').value) || 0;
+            const paid = parseInt(document.getElementById('paid-val').value) || 0;
+            const newPay = parseInt(document.getElementById('new-pay-val').value) || 0;
+            const balance = total - (paid + newPay);
+            const resEl = document.getElementById('calc-res');
+            resEl.innerText = new Intl.NumberFormat().format(balance) + " ریال";
+            resEl.className = balance > 0 ? "font-black text-xl text-rose-600" : "font-black text-xl text-emerald-600";
         }
 
         function syncSidePanel() {
-            const m = document.getElementById('pay-method').value;
-            const p = document.getElementById('payment-side-panel');
-            const mb = document.getElementById('main-form-box');
-            p.style.display = m === 'none' ? 'none' : 'block';
-            mb.className = m === 'none' ? "main-form-panel rounded-dynamic max-w-xl w-full" : "main-form-panel rounded-dynamic-open max-w-xl w-full";
-            ['card', 'check', 'pos'].forEach(x => document.getElementById('side-' + x).classList.add('hidden'));
-            if (m !== 'none') document.getElementById('side-' + m).classList.remove('hidden');
+            const method = document.getElementById('pay-method').value;
+            const panel = document.getElementById('payment-side-panel');
+            const mainBox = document.getElementById('main-form-box');
+            panel.style.display = method === 'none' ? 'none' : 'block';
+            mainBox.className = method === 'none' ? "main-form-panel rounded-dynamic max-w-xl w-full" : "main-form-panel rounded-dynamic-open max-w-xl w-full";
+            ['card','check','pos'].forEach(m => document.getElementById('side-'+m).classList.add('hidden'));
+            if(method !== 'none') document.getElementById('side-' + method).classList.remove('hidden');
         }
 
-        // تقویم
+        function openQuickPay(id) {
+            const t = transactions.find(x => x.id === id);
+            openTransactionModal();
+            document.getElementById('modal-title').innerText = "ثبت دریافتی جدید";
+            document.getElementById('edit-id').value = t.id;
+            document.getElementById('party-name').value = t.partyName;
+            document.getElementById('party-mobile').value = t.partyMobile;
+            document.getElementById('party-type').value = t.partyType;
+            document.getElementById('total-val').value = t.total;
+            document.getElementById('paid-val').value = t.paid;
+            
+            document.getElementById('quick-pay-section').classList.remove('hidden');
+            document.getElementById('main-amount-row').classList.add('hidden');
+            document.getElementById('party-name').readOnly = true;
+            document.getElementById('party-mobile').readOnly = true;
+            updateFinalBalance();
+        }
+
+        function newCostumerFactor(id) {
+            const t = transactions.find(x => x.id === id);
+            openTransactionModal();
+            document.getElementById('party-name').value = t.partyName;
+            document.getElementById('party-mobile').value = t.partyMobile;
+            document.getElementById('party-type').value = t.partyType;
+            syncSidePanel();
+        }
+
+        function editTx(id) {
+            const t = transactions.find(x => x.id === id);
+            openTransactionModal();
+            document.getElementById('edit-id').value = t.id;
+            document.getElementById('party-name').value = t.partyName;
+            document.getElementById('party-mobile').value = t.partyMobile;
+            document.getElementById('party-type').value = t.partyType;
+            document.getElementById('transaction-date').value = t.date;
+            document.getElementById('description').value = t.desc || '';
+            document.getElementById('total-val').value = t.total;
+            document.getElementById('paid-val').value = t.paid;
+            document.getElementById('total-display').value = new Intl.NumberFormat().format(t.total);
+            document.getElementById('paid-display').value = new Intl.NumberFormat().format(t.paid);
+            document.getElementById('pay-method').value = t.method || 'none';
+            const b = t.bankInfo || {};
+            document.getElementById('card-src-bank').value = b.cardSrcB || '';
+            document.getElementById('card-src-num').value = b.cardSrcN || '';
+            document.getElementById('card-dest-bank').value = b.cardDstB || '';
+            document.getElementById('card-dest-num').value = b.cardDstN || '';
+            document.getElementById('check-num').value = b.checkN || '';
+            document.getElementById('check-bank').value = b.checkB || '';
+            document.getElementById('check-date').value = b.checkD || '';
+            document.getElementById('check-owner').value = b.checkO || '';
+            document.getElementById('pos-terminal').value = b.posT || '';
+            document.getElementById('pos-rrn').value = b.posR || '';
+            syncSidePanel(); updateFinalBalance();
+        }
+
+        function openTransactionModal() {
+            document.getElementById('transaction-form').reset();
+            document.getElementById('modal-title').innerText = "ثبت تراکنش";
+            document.getElementById('edit-id').value = '';
+            document.getElementById('total-val').value = 0;
+            document.getElementById('paid-val').value = 0;
+            document.getElementById('new-pay-val').value = 0;
+            document.getElementById('total-w').innerText = "";
+            document.getElementById('paid-w').innerText = "";
+            document.getElementById('new-pay-w').innerText = "";
+            document.getElementById('calc-res').innerText = "۰ ریال";
+            document.getElementById('transaction-date').value = moment().locale('fa').format('YYYY/MM/DD');
+            document.getElementById('quick-pay-section').classList.add('hidden');
+            document.getElementById('main-amount-row').classList.remove('hidden');
+            document.getElementById('party-name').readOnly = false;
+            document.getElementById('party-mobile').readOnly = false;
+            syncSidePanel(); openModal('transaction-modal');
+        }
+
+        function clearDateFilter() {
+            document.getElementById('date-from').value = '';
+            document.getElementById('date-to').value = '';
+            renderTable();
+        }
+
         function showDP(inp) {
             activeInput = inp;
             const dp = document.getElementById('datepicker-element');
@@ -729,136 +550,30 @@
             renderCalendar();
             event.stopPropagation();
         }
+
+        function selectDate(s) { activeInput.value = s; hideDP(); renderTable(); }
+        function hideDP() { document.getElementById('datepicker-element').style.display = 'none'; }
         function changeMonth(n) { viewDate.add(n, 'jMonth'); renderCalendar(); }
-        function selectDate(s) { activeInput.value = s; document.getElementById('datepicker-element').style.display = 'none'; }
         function renderCalendar() {
             const m = moment(viewDate).locale('fa');
             document.getElementById('dp-month-year').innerText = m.format('jMMMM jYYYY');
             const g = document.getElementById('dp-days'); g.innerHTML = '';
             const end = m.clone().endOf('jMonth').jDate();
-            const start = m.clone().startOf('jMonth').day();
-            const skip = start === 6 ? 0 : start + 1;
+            const startDay = m.clone().startOf('jMonth').day();
+            let skip = startDay === 6 ? 0 : startDay + 1;
             for (let i = 0; i < skip; i++) g.innerHTML += '<div></div>';
             for (let d = 1; d <= end; d++) {
                 const s = m.clone().jDate(d).format('YYYY/MM/DD');
                 g.innerHTML += `<div class="dp-day" onclick="selectDate('${s}')">${d}</div>`;
             }
         }
-        window.onclick = (e) => { if (!e.target.closest('.dp-calendar')) document.getElementById('datepicker-element').style.display = 'none'; };
 
-        function exportToExcel() {
-            // هدرهای دقیق مطابق فایل ارسالی شما
-            const headers = [
-                "تاریخ", "نام طرف حساب", "موبایل", "توضیحات", "نوع", "مبلغ کل", "پرداختی",
-                "روش", "بانک مبدا", "کارت مبدا", "بانک مقصد", "کارت مقصد",
-                "شماره چک", "بانک چک", "تاریخ چک", "صاحب چک", "ترمینال پوز", "پیگیری پوز"
-            ];
+        function deleteTx(id) { if (confirm("حذف شود؟")) db.transaction("tx", "readwrite").objectStore("tx").delete(id).onsuccess = () => loadData(); }
+        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-            // تابع کمکی برای گذاشتن کوتیشن دور مقادیر (مثل فایل شما)
-            const q = (val) => `"${val || ''}"`;
-
-            let csvContent = "\uFEFF" + headers.join(",") + "\n"; // اضافه کردن BOM برای پشتیبانی فارسی
-
-            transactions.forEach(t => {
-                const row = [
-                    q(t.date),
-                    q(t.partyName),
-                    q(t.partyMobile),
-                    q(t.desc),
-                    q(t.partyType),
-                    q(t.total),
-                    q(t.paid),
-                    q(t.method),
-                    // جزئیات بانکی (اگر وجود نداشته باشند خالی رد می‌شوند)
-                    q(t.cardSrcBank),
-                    q(t.cardSrcNum),
-                    q(t.cardDestBank),
-                    q(t.cardDestNum),
-                    q(t.checkNum),
-                    q(t.checkBank),
-                    q(t.checkDate),
-                    q(t.checkOwner),
-                    q(t.posTerminal),
-                    q(t.posRRN)
-                ];
-                csvContent += row.join(",") + "\n";
-            });
-
-            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-            const link = document.createElement("a");
-            const url = URL.createObjectURL(blob);
-
-            // نام فایل شامل تاریخ امروز
-            const fileName = `Report_${new Date().toLocaleDateString('fa-IR').replace(/\//g, '-')}.csv`;
-
-            link.setAttribute("href", url);
-            link.setAttribute("download", fileName);
-            link.style.visibility = 'hidden';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        function importCSV(input) {
-            const file = input.files[0];
-            if (!file) return;
-
-            // تاییدیه قبل از انجام کار
-            if (!confirm("آیا مطمئن هستید؟ این فایل به لیست فعلی اضافه خواهد شد.\nپیشنهاد می‌شود اگر دیتابیس خالی است این کار را انجام دهید.")) {
-                input.value = '';
-                return;
-            }
-
-            const reader = new FileReader();
-            reader.onload = function (e) {
-                const text = e.target.result;
-                const lines = text.split('\n');
-                let count = 0;
-
-                // حلقه روی خطوط (از 1 شروع می‌کنیم تا هدر فایل نادیده گرفته شود)
-                for (let i = 1; i < lines.length; i++) {
-                    let line = lines[i].trim();
-                    if (!line) continue;
-
-                    // الگوریتم مخصوص فرمت فایل شما:
-                    // 1. حذف کوتیشن اول و آخر خط
-                    if (line.startsWith('"')) line = line.substring(1);
-                    if (line.endsWith('"')) line = line.substring(0, line.length - 1);
-
-                    // 2. شکستن بر اساس "," (جداکننده فیلدها)
-                    const cols = line.split('","');
-
-                    // اگر تعداد ستون‌ها کمتر از حد انتظار بود، نادیده بگیر
-                    if (cols.length < 7) continue;
-
-                    // نگاشت ستون‌ها طبق فایل ارسالی شما:
-                    // 0:تاریخ | 1:نام | 2:موبایل | 3:توضیحات | 4:نوع | 5:کل | 6:پرداختی
-
-                    const newItem = {
-                        id: Date.now() + Math.floor(Math.random() * 10000) + i, // ساخت ID یکتا
-                        ts: Date.now(), // زمان فعلی برای سورت
-                        date: cols[0].trim(),
-                        partyName: cols[1].trim(),
-                        partyMobile: cols[2] === "0" ? "" : cols[2].trim(), // حذف 0 های اضافی
-                        desc: cols[3].trim(),
-                        partyType: cols[4].trim() === 'supplier' ? 'supplier' : 'customer', // پیش‌فرض مشتری
-                        total: parseInt(cols[5].replace(/,/g, '')) || 0, // حذف کاما و تبدیل به عدد
-                        paid: parseInt(cols[6].replace(/,/g, '')) || 0,
-                        method: 'none' // روش پرداخت پیش‌فرض
-                    };
-
-                    transactions.push(newItem);
-                    count++;
-                }
-
-                renderTable(); // نمایش در جدول
-                saveToCloud(); // ذخیره فوری در GitHub Gist
-                alert(count + " رکورد با موفقیت وارد و ذخیره شد!");
-                input.value = ''; // ریست کردن اینپوت
-            };
-            reader.readAsText(file);
-        }
+        window.onclick = (e) => { if (!e.target.closest('.dp-calendar')) hideDP(); };
+        window.onload = initDB;
     </script>
 </body>
-
 </html>

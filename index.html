@@ -79,7 +79,7 @@
     <div id="lock-screen">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-80 text-center">
             <h2 class="text-xl font-bold mb-4">ورود به سیستم</h2>
-            <input type="password" id="app-pass-input" placeholder="رمز عبور را وارد کنید" class="input-field mb-4 !text-center" style="direction: ltr;">
+            <input type="password" id="app-pass-input" placeholder="رمز 1234" class="input-field mb-4 !text-center" style="direction: ltr;">
             <button onclick="checkPassword()" class="w-full bg-blue-600 text-white py-2 rounded-lg font-bold">ورود</button>
         </div>
     </div>
@@ -250,7 +250,7 @@
 
     <script>
         // --- تنظیمات امنیتی ---
-        const APP_PASSWORD = "AmirAhmadi1404@!"; // رمز عبور خود را اینجا تغییر دهید
+        const APP_PASSWORD = "1234"; // رمز عبور خود را اینجا تغییر دهید
 
         function checkPassword() {
             const input = document.getElementById('app-pass-input').value;
